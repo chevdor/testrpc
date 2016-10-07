@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 var yargs = require('yargs');
 var TestRPC = require('..');
 var pkg = require("../package.json");
@@ -110,7 +109,7 @@ var argv = yargs.argv;
 
 function parseAccounts(accounts) {
   function splitAccount(account) {
-    account = account.split(',');
+    account = account.split(',')
     return {
       secretKey: account[0],
       balance: account[1]
@@ -122,7 +121,7 @@ function parseAccounts(accounts) {
   else if (!Array.isArray(accounts))
     return;
 
-  var ret = [];
+  var ret = []
   for (var i = 0; i < accounts.length; i++) {
     ret.push(splitAccount(accounts[i]));
   }
@@ -177,6 +176,7 @@ if (options.fork) {
 var server = TestRPC.server(options);
 
 console.log("EthereumJS TestRPC v" + pkg.version);
+
 server.listen(options.port, options.hostname, function(err, state) {
   if (err) {
     console.log(err);
@@ -190,12 +190,11 @@ server.listen(options.port, options.hostname, function(err, state) {
   var addresses = Object.keys(accounts);
 
   addresses.forEach(function(address, index) {
-    var balanceInEth = util.bufferToInt(accounts[address].account.balance)*1e-18;
-    var line = "(" + index + ") " + address + address + ' - ' + balanceInEth + ' ETH';
+    var balanceInEth = web3.fromWei(util.bufferToInt(accounts[address].account.balance), 'ether');
+    var line = "(" + index + ") " + address;
+    line += state.isUnlocked(address)?" 🔓 ":" 🔒 "; 
+    line += ' - ' + balanceInEth + ' ETH';
 
-    if (state.isUnlocked(address) == false) {
-      line += " 🔒";
-    }
     console.log(line);
   });
 
@@ -212,7 +211,7 @@ server.listen(options.port, options.hostname, function(err, state) {
     console.log("HD Wallet");
     console.log("==================");
     console.log("Mnemonic:      " + state.mnemonic);
-    console.log("Base HD Path:  " + state.wallet_hdpath + "{account_index}");
+    console.log("Base HD Path:  " + state.wallet_hdpath + "{account_index}")
   }
 
   if (options.gasPrice) {
