@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 var yargs = require('yargs');
 var TestRPC = require('..');
 var pkg = require("../package.json");
@@ -137,15 +138,15 @@ if (typeof argv.unlock == "string") {
 }
 
 var options = {
-  port: argv.port,
-  hostname: argv.hostname,
+  port: argv.p || argv.port || "8545",
+  hostname: argv.h || argv.hostname,
   debug: argv.debug,
-  seed: argv.seed,
-  mnemonic: argv.mnemonic,
-  total_accounts: argv.total_accounts,
-  blocktime: argv.blocktime,
-  gasPrice: argv.gasPrice,
-  gasLimit: argv.gasLimit,
+  seed: argv.s || argv.seed,
+  mnemonic: argv.m || argv.mnemonic,
+  total_accounts: argv.a || argv.accounts,
+  blocktime: argv.b || argv.blocktime,
+  gasPrice: argv.g || argv.gasPrice,
+  gasLimit: argv.l || argv.gasLimit,
   accounts: parseAccounts(argv.account),
   unlocked_accounts: argv.unlock,
   fork: argv.f || argv.fork || false,
@@ -156,18 +157,6 @@ var options = {
 };
 
 var fork_address;
-
-if (argv.help) {
-  console.log('This is TestRPC version '+ pkg.version);
-  console.log('More at ' + pkg.repository.url);
-  yargs.showHelp();
-  process.exit(0);
-}
-
-if (argv.version) {
-  console.log('TestRPC version '+ pkg.version);
-  process.exit(0);
-}
 
 // If we're forking from another client, don't try to use the same port.
 if (options.fork) {
