@@ -88,7 +88,7 @@ yargs
   describe: 'Chose how much to output. 0: Minimum, 1: Normal, 2: Verbose',
   type: 'integer',
   alias: 'v',
-  default: 2          
+  default: 1          
 })
 .option('help', {
   describe: 'Show some help',
