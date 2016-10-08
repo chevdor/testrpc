@@ -62,10 +62,15 @@ yargs
   default: 1
 })
 .option('gasLimit', {
-  describe: 'Use a custom Gas Limit (defaults to 0x47E7C4)',
+  describe: 'Use a custom Block Gas Limit (defaults to 0x47E7C4)',
   alias: 'l',
   type: 'integer',
   default: 4712388 // 0x47E7C4
+})
+.option('txGasLimit', {
+  describe: 'Use a custom Transaction Gas Limit (defaults to 0x15f90)',
+  type: 'integer',
+  default: 90000 // 0x15f90
 })
 .option('account', {
   describe: 'Specify the accounts to generate at startup. testrpc --account="<privatekey with 0x>,<balance in wei>" [--account="<privatekey>,balance"]',
@@ -151,6 +156,7 @@ var options = {
   blocktime: argv.blocktime,
   gasPrice: argv.gasPrice,
   gasLimit: argv.gasLimit,
+  txGasLimit: argv.txGasLimit,
   total_accounts: argv.total_accounts,
   accounts: parseAccounts(argv.account),
   unlocked_accounts: argv.unlock,
@@ -241,9 +247,16 @@ server.listen(options.port, options.hostname, function(err, state) {
 
   if (options.gasLimit) {
     console.log("");
-    console.log("Gas Limit");
+    console.log("Block Gas Limit");
     console.log("==================");
     console.log(options.gasLimit);
+  }
+
+  if (options.txGasLimit) {
+    console.log("");
+    console.log("Tx Gas Limit");
+    console.log("==================");
+    console.log(options.txGasLimit);
   }
 
   if (options.fork) {
