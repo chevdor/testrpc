@@ -157,6 +157,7 @@ var options = {
   blocktime: argv.b || argv.blocktime,
   gasPrice: argv.g || argv.gasPrice,
   gasLimit: argv.l || argv.gasLimit,
+  txGasLimit: argv.txGasLimit,
   accounts: parseAccounts(argv.account),
   unlocked_accounts: argv.unlock,
   fork: argv.fork,
