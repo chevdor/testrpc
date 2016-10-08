@@ -84,11 +84,11 @@ yargs
   type: 'integer',
   default: 1377
 })
-.option('verbose', {
-  describe: 'Tell me more!',
+.option('verbosity', {
+  describe: 'Chose how much to output. 0: Minimum, 1: Normal, 2: Verbose',
+  type: 'integer',
   alias: 'v',
-  type: 'boolean',
-  default: false
+  default: 2          
 })
 .option('help', {
   describe: 'Show some help',
@@ -156,7 +156,7 @@ var options = {
   unlocked_accounts: argv.unlock,
   fork: argv.fork,
   network_id: argv.network_id,
-  verbose: argv.verbose,
+  verbosity: argv.verbosity,
   secure: argv.secure,
   logger: console
 };
