@@ -236,28 +236,15 @@ server.listen(options.port, options.hostname, function(err, state) {
     console.log("Base HD Path:  " + state.wallet_hdpath + "{account_index}")
   }
 
-  if (options.gasPrice) {
-    console.log("");
-    console.log("Gas Price");
-    console.log("==================");
-    console.log(options.gasPrice);
-  }
+  console.log("\nOptions summary");
+  console.log("==================");
+  console.log("Gas Price\t: " + options.gasPrice);
+  console.log("Block Gas Limit\t: " + options.gasLimit);
+  console.log("Tx Gas Limit\t: " + options.txGasLimit);
+  console.log("Blocktime\t: " + options.blocktime);
+  console.log("Network ID\t: " + options.network_id);
 
-  if (options.gasLimit) {
-    console.log("");
-    console.log("Block Gas Limit");
-    console.log("==================");
-    console.log(options.gasLimit);
-  }
-
-  if (options.txGasLimit) {
-    console.log("");
-    console.log("Tx Gas Limit");
-    console.log("==================");
-    console.log(options.txGasLimit);
-  }
-
-  if (options.fork !== '') {
+  if (options.fork) {
     console.log("");
     console.log("Forked Chain");
     console.log("==================");
@@ -265,8 +252,8 @@ server.listen(options.port, options.hostname, function(err, state) {
     console.log("Block:       " + web3.toBigNumber(state.blockchain.fork_block_number).toString(10));
     console.log("Network ID:  " + state.net_version);
     console.log("Time:        " + (state.blockchain.startTime || new Date()).toString());
-  }
-
+  } 
+ 
   console.log("");
   console.log("Listening on " + (options.hostname || "localhost") + ":" + options.port);
 });
