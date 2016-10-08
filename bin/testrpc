@@ -152,7 +152,7 @@ var options = {
   debug: argv.debug,
   seed: argv.s || argv.seed,
   mnemonic: argv.m || argv.mnemonic,
-  total_accounts: argv.a || argv.accounts,
+  total_accounts: argv.total_accounts,
   blocktime: argv.b || argv.blocktime,
   gasPrice: argv.g || argv.gasPrice,
   gasLimit: argv.l || argv.gasLimit,
