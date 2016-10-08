@@ -143,15 +143,15 @@ if (typeof argv.unlock == "string") {
 }
 
 var options = {
-  port: argv.p || argv.port || "8545",
-  hostname: argv.h || argv.hostname,
+  port: argv.port,
+  hostname: argv.hostname,
   debug: argv.debug,
-  seed: argv.s || argv.seed,
-  mnemonic: argv.m || argv.mnemonic,
-  total_accounts: argv.a || argv.accounts,
-  blocktime: argv.b || argv.blocktime,
-  gasPrice: argv.g || argv.gasPrice,
-  gasLimit: argv.l || argv.gasLimit,
+  seed: argv.seed,
+  mnemonic: argv.mnemonic,
+  blocktime: argv.blocktime,
+  gasPrice: argv.gasPrice,
+  gasLimit: argv.gasLimit,
+  total_accounts: argv.total_accounts,
   accounts: parseAccounts(argv.account),
   unlocked_accounts: argv.unlock,
   fork: argv.fork,
