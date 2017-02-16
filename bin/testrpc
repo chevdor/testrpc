@@ -8,10 +8,114 @@ var Web3 = require("web3");
 var web3 = new Web3(); // Used only for its BigNumber library.
 
 yargs
+.usage('Usage: $0 [options...] ')
+// .command('start', 'Start the server')
+.option('port', {
+  describe: 'The port to serve',
+  alias: 'p',
+  type: 'string',   // for compativility with previous version
+  default: '8545'
+})
+.option('hostname', {
+  describe: 'Hostname to listen on. Defaults to Node\'s server.listen() default.',
+  alias: 'h',
+  type: 'string'
+})
+.option('debug', {
+  describe: 'Output VM opcodes for debugging',
+  type: 'boolean',
+  default: false
+})
+.option('deterministic', {
+  describe: 'Generate deterministic addresses based on a pre-defined mnemonic.',
+  alias: 'd',
+  type: 'boolean',
+  default: false
+})
+.option('seed', {
+  describe: 'Use arbitrary data to generate the HD wallet mnemonic to be used.',
+  alias: 's',
+  type: 'string',
+  default: 'TestRPC is awesome!'
+})
+.option('mnemonic', {
+  describe: 'Use a specific HD wallet mnemonic to generate initial addresses.',
+  alias: 'm',
+  type: 'string'
+})
+.option('total_accounts', {
+  describe: 'Number of accounts to generate at startup.',
+  alias: 't',
+  type: 'integer',
+  default: 10
+})
+.option('blocktime', {
+  describe: 'Specify blocktime in seconds for automatic mining. Default is 0 and no auto-mining.',
+  alias: 'b',
+  type: 'integer',
+  default: 0
+})
+.option('gasPrice', {
+  describe: 'Use a custom Gas Price (defaults to 1)',
+  alias: 'g',
+  type: 'integer',
+  default: 1
+})
+.option('gasLimit', {
+  describe: 'Use a custom Block Gas Limit (defaults to 0x47E7C4)',
+  alias: 'l',
+  type: 'integer',
+  default: 4712388 // 0x47E7C4
+})
+.option('txGasLimit', {
+  describe: 'Use a custom Transaction Gas Limit (defaults to 0x15f90)',
+  type: 'integer',
+  default: 90000 // 0x15f90
+})
+.option('account', {
+  describe: 'Specify the accounts to generate at startup. testrpc --account="<privatekey with 0x>,<balance in wei>" [--account="<privatekey>,balance"]',
+  alias: 'a',
+  type: 'string'
+})
+.option('fork', {
+  describe: 'Fork from another currently running Ethereum client at a given block. Input should be the HTTP location and port of the other client, e.g. http://localhost:8545. You can optionally specify the block to fork from using an @ sign: http://localhost:8545@1599200',
+  alias: 'f',
+  type: 'string'
+})
+.option('network_id', {
+  describe: 'The network id',
+  alias: 'i',
+  type: 'integer',
+  default: 1377
+})
+.option('verbosity', {
+  describe: 'Chose how much to output. 0: Minimum, 1: Normal, 2: Verbose',
+  type: 'integer',
+  alias: 'v',
+  default: 1          
+})
+.option('help', {
+  describe: 'Show some help',
+  type: 'boolean',
+  default: false
+})
+.option('version', {
+  describe: 'Show the version',
+  type: 'boolean',
+  default: false
+})
+.option("secure", {
+  type: "boolean",
+  describe: 'All accounts are locked by default',
+  alias: "n",
+  default: false
+})
 .option("unlock", {
   type: "string",
   alias: "u"
-});
+})
+.strict()
+.showHelpOnFail(true);
 
 var argv = yargs.argv;
 
@@ -50,20 +154,33 @@ var options = {
   debug: argv.debug,
   seed: argv.s || argv.seed,
   mnemonic: argv.m || argv.mnemonic,
-  total_accounts: argv.a || argv.accounts,
+  total_accounts: argv.total_accounts,
   blocktime: argv.b || argv.blocktime,
   gasPrice: argv.g || argv.gasPrice,
   gasLimit: argv.l || argv.gasLimit,
+  txGasLimit: argv.txGasLimit,
   accounts: parseAccounts(argv.account),
   unlocked_accounts: argv.unlock,
-  fork: argv.f || argv.fork || false,
-  network_id: argv.i || argv.networkId,
-  verbose: argv.v || argv.verbose,
-  secure: argv.n || argv.secure || false,
+  fork: argv.fork,
+  network_id: argv.network_id,
+  verbosity: argv.verbosity,
+  secure: argv.secure,
   logger: console
-}
+};
 
 var fork_address;
+
+if (argv.help) {
+  console.log('This is TestRPC version '+ pkg.version);
+  console.log('More at ' + pkg.repository.url);
+  yargs.showHelp();
+  process.exit(0);
+}
+
+if (argv.version) {
+  console.log('TestRPC version '+ pkg.version);
+  process.exit(0);
+}
 
 // If we're forking from another client, don't try to use the same port.
 if (options.fork) {
@@ -85,6 +202,14 @@ var server = TestRPC.server(options);
 
 console.log("EthereumJS TestRPC v" + pkg.version);
 
+function getBalanceInEth(val) {
+  var balance = web3.fromWei(val, 'ether');
+  var splt = balance.split('.');
+  if (splt.length > 1)
+    splt[1] = splt[1].substr(0,3);      // 100000.00000000001 => 100000.000 
+  return splt.join('.')
+}
+
 server.listen(options.port, options.hostname, function(err, state) {
   if (err) {
     console.log(err);
@@ -98,11 +223,11 @@ server.listen(options.port, options.hostname, function(err, state) {
   var addresses = Object.keys(accounts);
 
   addresses.forEach(function(address, index) {
-    var line = "(" + index + ") " + address;
+    var balanceInEth = getBalanceInEth(util.bufferToInt(accounts[address].account.balance));
 
-    if (state.isUnlocked(address) == false) {
-      line += " 🔒";
-    }
+    var line = "(" + index + ") " + address;
+    line += state.isUnlocked(address)?" 🔓 ":" 🔐 "; 
+    line += ' - ' + balanceInEth + ' ETH';
 
     console.log(line);
   });
@@ -123,19 +248,13 @@ server.listen(options.port, options.hostname, function(err, state) {
     console.log("Base HD Path:  " + state.wallet_hdpath + "{account_index}")
   }
 
-  if (options.gasPrice) {
-    console.log("");
-    console.log("Gas Price");
-    console.log("==================");
-    console.log(options.gasPrice);
-  }
-
-  if (options.gasLimit) {
-    console.log("");
-    console.log("Gas Limit");
-    console.log("==================");
-    console.log(options.gasLimit);
-  }
+  console.log("\nOptions summary");
+  console.log("==================");
+  console.log("Gas Price\t: " + options.gasPrice);
+  console.log("Block Gas Limit\t: " + options.gasLimit);
+  console.log("Tx Gas Limit\t: " + options.txGasLimit);
+  console.log("Blocktime\t: " + options.blocktime);
+  console.log("Network ID\t: " + options.network_id);
 
   if (options.fork) {
     console.log("");
@@ -145,8 +264,8 @@ server.listen(options.port, options.hostname, function(err, state) {
     console.log("Block:       " + web3.toBigNumber(state.blockchain.fork_block_number).toString(10));
     console.log("Network ID:  " + state.net_version);
     console.log("Time:        " + (state.blockchain.startTime || new Date()).toString());
-  }
-
+  } 
+ 
   console.log("");
   console.log("Listening on " + (options.hostname || "localhost") + ":" + options.port);
 });
